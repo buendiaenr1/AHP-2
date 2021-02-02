@@ -67,6 +67,11 @@ Apoyo al profesorado por parte de la institución (SF)
 Problemas éticos y legales con apoyo institucional (ELI)
 
 
+El archivo _**Agregación.xlsm**_ crea un vector propio normalizado de un grupo de vectores propios normalizados agregados.
+
+Tiene la función de unificar todos los vectores propios normalizados de todas las encuestas realizadas y formar un solo vector normalizado final.
+Que representa los pesos de los criterios de los encuestados o expertos.
+
 
 **Referencias**
 
