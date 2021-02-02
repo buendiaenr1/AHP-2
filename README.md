@@ -72,6 +72,8 @@ El archivo _**Agregación.xlsm**_ crea un vector propio normalizado de un grupo 
 Tiene la función de unificar todos los vectores propios normalizados de todas las encuestas realizadas y formar un solo vector normalizado final.
 Que representa los pesos de los criterios de los encuestados o expertos.
 
+El archivo _**enrlibdanj.xls**_ tiene los vectores propios normalizados de todas las encuestas evaluadas, se copian por separado al archivo _Agregación.xlsm_ para finalizar.
+
 
 **Referencias**
 
