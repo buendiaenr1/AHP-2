@@ -75,6 +75,9 @@ Que representa los pesos de los criterios de los encuestados o expertos.
 El archivo _**enrlibdanj.xls**_ tiene los vectores propios normalizados de todas las encuestas evaluadas, se copian por separado al archivo _Agregación.xlsm_ para finalizar.
 
 
+El archivo **index.HTML** verifica el artículo http://www.pertanika.upm.edu.my/resources/files/Pertanika%20PAPERS/JSSH%20Vol.%2020%20(S)%20Dec.%202012/08_page129-142.pdf 
+
+
 **Referencias**
 
 Peñalosa Castro, E., & Castañeda Figueiras, S. (2008). Generación de conocimiento en la educación en línea: 
