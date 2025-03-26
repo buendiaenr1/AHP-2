@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proceso de Análisis Jerárquico (AHP)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .consistent {
+            color: green;
+        }
+        .inconsistent {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>***** Proceso de Análisis Jerárquico (AHP) *****</h1>
+    <p>Este programa calcula los pesos relativos de criterios usando AHP.</p>
+
+    <h2>Paso 1: Definir los criterios</h2>
+    <pre>
+Criterios:
+- Speed
+- Strength
+- Power
+- Balance
+- Coordination
+- Reaction time
+- Flexibility
+- Body mechanic
+    </pre>
+
+    <h2>Paso 2: Matriz de comparaciones por pares</h2>
+    <pre>
+Matriz de comparaciones por pares:
+[
+    [1.0, 2.44, 0.58, 3.14, 0.73, 0.51, 3.6, 1.26],
+    [0.41, 1.0, 0.22, 0.54, 0.73, 0.33, 2.31, 0.67],
+    [1.72, 4.56, 1.0, 4.92, 3.58, 2.74, 4.78, 2.49],
+    [0.32, 1.86, 0.2, 1.0, 0.33, 0.39, 1.94, 0.62],
+    [1.37, 1.37, 0.28, 3.05, 1.0, 0.59, 2.85, 1.63],
+    [1.96, 3.06, 0.37, 2.58, 1.7, 1.0, 3.99, 1.98],
+    [0.28, 0.43, 0.21, 0.51, 0.35, 0.25, 1.0, 0.61],
+    [0.79, 1.49, 0.4, 1.61, 0.61, 0.51, 1.63, 1.0]
+]
+    </pre>
+
+    <h2>Paso 3: Pesos relativos de los criterios</h2>
+    <div class="result">
+        <strong>Pesos relativos:</strong>
+        <ul>
+            <li>Speed: 0.140</li>
+            <li>Strength: 0.060</li>
+            <li>Power: 0.300</li>
+            <li>Balance: 0.070</li>
+            <li>Coordination: 0.130</li>
+            <li>Reaction time: 0.180</li>
+            <li>Flexibility: 0.040</li>
+            <li>Body mechanic: 0.090</li>
+        </ul>
+    </div>
+
+    <h2>Paso 4: Consistencia de la matriz de criterios</h2>
+    <div class="result consistent">
+        <strong>Consistencia:</strong>
+        <ul>
+            <li>Índice de Consistencia (CI): 0.013</li>
+            <li>Razón de Consistencia (CR): 0.009</li>
+            <li>La matriz de criterios es consistente.</li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>Este contenido fue generado a partir de un programa Rust simulado.</p>
+    </footer>
+</body>
+</html>
