@@ -1,6 +1,6 @@
 # AHP-2
 ## e _ learning
-## AHP_V2.exe    es la mejor opción
+## AHP_V2.exe    es la mejor opción  así como index_V2.HTML
 
 Tomando como base la información generada en (Quadri Noorulhasan, y otros, 2019) en la Tabla 1 de dicho documento, 
 con respecto a los factores críticos de éxito (CSFs por sus siglas en ingles) y tomando en cuenta las dimensiones de: 
