@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AHP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .consistent {
+            color: green;
+        }
+        .inconsistent {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Proceso de Análisis Jerárquico (AHP)</h1>
+    <!-- Formulario para ingresar criterios y alternativas -->
+    <div class="input-group">
+        <label for="criteriaCount">Número de criterios:</label>
+        <input type="number" id="criteriaCount" min="2" placeholder="Ej. 3" required>
+    </div>
+    <div class="input-group">
+        <label for="criteriaNames">Nombres de los criterios (separados por comas):</label>
+        <input type="text" id="criteriaNames" placeholder="Ej. costo,calidad,durabilidad" required>
+    </div>
+    <div class="input-group">
+        <label for="alternativesCount">Número de alternativas:</label>
+        <input type="number" id="alternativesCount" min="2" placeholder="Ej. 2" required>
+    </div>
+    <div class="input-group">
+        <label for="alternativesNames">Nombres de las alternativas (separados por comas):</label>
+        <input type="text" id="alternativesNames" placeholder="Ej. opción1,opción2" required>
+    </div>
+    <button id="generateMatrixButton">Generar Matrices</button>
+
+    <!-- Comparaciones por pares de criterios -->
+    <table id="criteriaTable" style="display: none;">
+        <thead>
+            <tr id="criteriaHeader"></tr>
+        </thead>
+        <tbody id="criteriaBody"></tbody>
+    </table>
+
+    <!-- Botón para calcular -->
+    <button id="calculateButton" style="display: none;">Calcular Resultados</button>
+
+    <!-- Área de salida -->
+    <div id="output">
+        <h3>Resultados</h3>
+        <p>Aquí se mostrarán los resultados del análisis.</p>
+    </div>
+
+    <script>
+        // Función para normalizar la matriz de comparaciones por pares
+        function normalizeMatrix(matrix) {
+            const numRows = matrix.length;
+            const numCols = matrix[0].length;
+            const normalized = Array.from({ length: numRows }, () => Array(numCols).fill(0));
+            for (let col = 0; col < numCols; col++) {
+                const colSum = matrix.reduce((sum, row) => sum + row[col], 0);
+                if (colSum === 0) {
+                    alert("Error: La suma de una columna es cero. Verifique las comparaciones.");
+                    return null;
+                }
+                for (let row = 0; row < numRows; row++) {
+                    normalized[row][col] = matrix[row][col] / colSum;
+                }
+            }
+            return normalized;
+        }
+
+        // Función para calcular los pesos relativos
+        function calculateWeights(normalizedMatrix) {
+            const numRows = normalizedMatrix.length;
+            const weights = Array(numRows).fill(0);
+            for (let row = 0; row < numRows; row++) {
+                weights[row] = normalizedMatrix[row].reduce((sum, value) => sum + value, 0) / numRows;
+            }
+            return weights;
+        }
+
+        // Función para calcular el índice de consistencia (CI) y la razón de consistencia (CR)
+        function calculateConsistency(matrix, weights) {
+            const n = matrix.length;
+            let lambdaMax = 0;
+            for (let i = 0; i < n; i++) {
+                let sum = 0;
+                for (let j = 0; j < n; j++) {
+                    sum += matrix[i][j] * weights[j];
+                }
+                lambdaMax += sum / weights[i];
+            }
+            lambdaMax /= n;
+            const ci = (lambdaMax - n) / (n - 1);
+            const riValues = [0, 0, 0.58, 0.90, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49];
+            const ri = riValues[n] || 0;
+            const cr = ci / ri;
+            return { ci, cr };
+        }
+
+        // Generar matrices dinámicamente
+        document.getElementById("generateMatrixButton").addEventListener("click", () => {
+            const criteriaCount = parseInt(document.getElementById("criteriaCount").value);
+            const criteriaNamesInput = document.getElementById("criteriaNames").value.trim();
+            const criteriaNames = criteriaNamesInput.split(",").map(name => name.trim());
+            const alternativesCount = parseInt(document.getElementById("alternativesCount").value);
+            const alternativesNamesInput = document.getElementById("alternativesNames").value.trim();
+            const alternativesNames = alternativesNamesInput.split(",").map(name => name.trim());
+
+            if (isNaN(criteriaCount) || criteriaCount < 2) {
+                alert("Por favor, ingrese un número válido de criterios (mínimo 2).");
+                return;
+            }
+            if (criteriaNames.length !== criteriaCount) {
+                alert(`El número de nombres de criterios (${criteriaNames.length}) no coincide con el número de criterios (${criteriaCount}).`);
+                return;
+            }
+            if (isNaN(alternativesCount) || alternativesCount < 2) {
+                alert("Por favor, ingrese un número válido de alternativas (mínimo 2).");
+                return;
+            }
+            if (alternativesNames.length !== alternativesCount) {
+                alert(`El número de nombres de alternativas (${alternativesNames.length}) no coincide con el número de alternativas (${alternativesCount}).`);
+                return;
+            }
+
+            // Limpiar tablas
+            document.getElementById("criteriaHeader").innerHTML = "";
+            document.getElementById("criteriaBody").innerHTML = "";
+
+            // Generar encabezados de la tabla de criterios
+            const criteriaHeader = document.getElementById("criteriaHeader");
+            criteriaHeader.innerHTML = `<th>Criterio</th>`;
+            criteriaNames.forEach(name => {
+                criteriaHeader.innerHTML += `<th>${name}</th>`;
+            });
+
+            // Generar filas y celdas de la matriz de criterios
+            const criteriaBody = document.getElementById("criteriaBody");
+            for (let i = 0; i < criteriaCount; i++) {
+                const row = criteriaBody.insertRow();
+                const cell1 = row.insertCell();
+                cell1.innerHTML = criteriaNames[i];
+                for (let j = 0; j < criteriaCount; j++) {
+                    const cell2 = row.insertCell();
+                    if (i === j) {
+                        cell2.innerHTML = "1";
+                    } else {
+                        const select = document.createElement("select");
+                        const options = [
+
+				{ value: 9, text: "Indiscutiblemente más preferida" },
+				{ value: 8, text: "Absolutamente más preferida" },
+				{ value: 7, text: "Extremadamente más preferida" },
+                            	{ value: 6, text: "Significativamente más preferida" },
+				{ value: 5, text: "Mucho más preferida" },
+				{ value: 4, text: "Más preferida" },
+				{ value: 3, text: "Moderadamente más preferida" },
+				{ value: 2, text: "Ligeramente más preferida" },
+				{ value: 1, text: "Igualmente preferida", selected: true },
+                            	{ value: 0.5, text: "Ligeramente menos preferida" },
+                            	{ value: 0.33, text: "Moderadamente menos preferida" },
+                            	{ value: 0.25, text: "Menos preferida" },
+                            	{ value: 0.2, text: "Mucho menos preferida" },
+                            	{ value: 0.1667, text: "Significativamente menos preferida" },
+                            	{ value: 0.1429, text: "Extremadamente menos preferida" },
+                            	{ value: 0.125, text: "Absolutamente menos preferida" },
+                            	{ value: 0.1111, text: "Indiscutiblemente menos preferida" }
+                        ];
+                        options.forEach(option => {
+                            const opt = document.createElement("option");
+                            opt.value = option.value;
+                            opt.text = option.text;
+                            select.appendChild(opt);
+                        });
+                        cell2.appendChild(select);
+                    }
+                }
+            }
+
+            // Mostrar la tabla y el botón "Calcular"
+            document.getElementById("criteriaTable").style.display = "table";
+            document.getElementById("calculateButton").style.display = "block";
+        });
+
+        // Calcular resultados
+        document.getElementById("calculateButton").addEventListener("click", () => {
+            const criteriaCount = parseInt(document.getElementById("criteriaCount").value);
+            const criteriaNamesInput = document.getElementById("criteriaNames").value.trim();
+            const criteriaNames = criteriaNamesInput.split(",").map(name => name.trim());
+            const alternativesCount = parseInt(document.getElementById("alternativesCount").value);
+            const alternativesNamesInput = document.getElementById("alternativesNames").value.trim();
+            const alternativesNames = alternativesNamesInput.split(",").map(name => name.trim());
+
+            // Obtener valores de la matriz de criterios
+            const criteriaMatrix = [];
+            const criteriaBody = document.getElementById("criteriaBody");
+            for (let i = 0; i < criteriaCount; i++) {
+                const row = [];
+                for (let j = 0; j < criteriaCount; j++) {
+                    const cell = criteriaBody.rows[i].cells[j + 1];
+                    if (cell.querySelector("select")) {
+                        row.push(parseFloat(cell.querySelector("select").value));
+                    } else {
+                        row.push(parseFloat(cell.innerHTML));
+                    }
+                }
+                criteriaMatrix.push(row);
+            }
+
+            // Normalizar matriz de criterios
+            const normalizedCriteriaMatrix = normalizeMatrix(criteriaMatrix);
+            if (normalizedCriteriaMatrix === null) {
+                return;
+            }
+
+            // Calcular pesos de criterios
+            const criteriaWeights = calculateWeights(normalizedCriteriaMatrix);
+
+            // Calcular consistencia de criterios
+            const consistencyCriteria = calculateConsistency(criteriaMatrix, criteriaWeights);
+
+            // Generar matrices de alternativas por criterio
+            const alternativeMatrices = [];
+            const alternativeTables = [];
+            for (let k = 0; k < criteriaCount; k++) {
+                const altMatrix = [];
+                const tableDiv = document.createElement("div");
+                tableDiv.innerHTML = `
+                    <h3>Comparación de Alternativas para ${criteriaNames[k]}</h3>
+                    <table id="altTable-${k}" class="alternative-table">
+                        <thead><tr><th>Alternativa</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                `;
+                document.body.appendChild(tableDiv);
+                const altTableBody = tableDiv.querySelector("tbody");
+
+                for (let i = 0; i < alternativesCount; i++) {
+                    const row = [];
+                    const tableRow = altTableBody.insertRow();
+                    const cell1 = tableRow.insertCell();
+                    cell1.innerHTML = alternativesNames[i];
+                    for (let j = 0; j < alternativesCount; j++) {
+                        const cell2 = tableRow.insertCell();
+                        if (i === j) {
+                            cell2.innerHTML = "1";
+                            row.push(1);
+                        } else {
+                            const select = document.createElement("select");
+                            
+				const options = [
+
+				{ value: 9, text: "Indiscutiblemente más preferida" },
+				{ value: 8, text: "Absolutamente más preferida" },
+				{ value: 7, text: "Extremadamente más preferida" },
+                            	{ value: 6, text: "Significativamente más preferida" },
+				{ value: 5, text: "Mucho más preferida" },
+				{ value: 4, text: "Más preferida" },
+				{ value: 3, text: "Moderadamente más preferida" },
+				{ value: 2, text: "Ligeramente más preferida" },
+				{ value: 1, text: "Igualmente preferida", selected: true },
+                            	{ value: 0.5, text: "Ligeramente menos preferida" },
+                            	{ value: 0.33, text: "Moderadamente menos preferida" },
+                            	{ value: 0.25, text: "Menos preferida" },
+                            	{ value: 0.2, text: "Mucho menos preferida" },
+                            	{ value: 0.1667, text: "Significativamente menos preferida" },
+                            	{ value: 0.1429, text: "Extremadamente menos preferida" },
+                            	{ value: 0.125, text: "Absolutamente menos preferida" },
+                            	{ value: 0.1111, text: "Indiscutiblemente menos preferida" }
+                        	];
+
+                            options.forEach(option => {
+                                const opt = document.createElement("option");
+                                opt.value = option.value;
+                                opt.text = option.text;
+                                select.appendChild(opt);
+                            });
+                            cell2.appendChild(select);
+                            row.push(select);
+                        }
+                    }
+                    altMatrix.push(row);
+                }
+                alternativeMatrices.push(altMatrix);
+                alternativeTables.push(tableDiv);
+            }
+
+            // Agregar botón para finalizar cálculo de alternativas
+            const finalizeButton = document.createElement("button");
+            finalizeButton.innerHTML = "Finalizar Cálculo";
+            finalizeButton.style.marginTop = "20px";
+            document.body.appendChild(finalizeButton);
+
+            finalizeButton.addEventListener("click", () => {
+                const alternativeWeightsPerCriteria = [];
+                let allValid = true;
+
+                for (let k = 0; k < criteriaCount; k++) {
+                    const altMatrix = alternativeMatrices[k];
+                    const matrixValues = [];
+
+                    for (let i = 0; i < alternativesCount; i++) {
+                        const row = [];
+                        for (let j = 0; j < alternativesCount; j++) {
+                            if (i === j) {
+                                row.push(1);
+                            } else {
+                                const cell = altMatrix[i][j];
+                                if (typeof cell === "object") {
+                                    row.push(parseFloat(cell.value));
+                                } else {
+                                    row.push(cell);
+                                }
+                            }
+                        }
+                        matrixValues.push(row);
+                    }
+
+                    if (matrixValues.some(row => row.includes(NaN))) {
+                        alert(`La matriz de alternativas para el criterio ${criteriaNames[k]} contiene valores inválidos.`);
+                        allValid = false;
+                        break;
+                    }
+
+                    const normMatrix = normalizeMatrix(matrixValues);
+                    if (normMatrix === null) {
+                        allValid = false;
+                        break;
+                    }
+                    const weights = calculateWeights(normMatrix);
+                    alternativeWeightsPerCriteria.push(weights);
+                }
+
+                if (!allValid) {
+                    return;
+                }
+
+                // Calcular pesos finales de las alternativas
+                const finalAlternativeWeights = Array(alternativesCount).fill(0);
+                for (let i = 0; i < alternativesCount; i++) {
+                    for (let k = 0; k < criteriaCount; k++) {
+                        finalAlternativeWeights[i] += alternativeWeightsPerCriteria[k][i] * criteriaWeights[k];
+                    }
+                }
+
+                // Mostrar resultados
+                const output = document.getElementById("output");
+                output.innerHTML = `<h3>Resultados Finales</h3>`;
+                output.innerHTML += `<p>Pesos relativos de los criterios:</p>`;
+                output.innerHTML += `<ul>`;
+                for (let i = 0; i < criteriaCount; i++) {
+                    output.innerHTML += `<li>${criteriaNames[i]}: ${criteriaWeights[i].toFixed(3)}</li>`;
+                }
+                output.innerHTML += `</ul>`;
+                output.innerHTML += `<p>Índice de consistencia (CI) de los criterios: ${consistencyCriteria.ci.toFixed(3)}</p>`;
+                output.innerHTML += `<p>Razón de consistencia (CR) de los criterios: ${consistencyCriteria.cr.toFixed(3)}</p>`;
+                output.innerHTML += `<p class="${consistencyCriteria.cr < 0.1 ? 'consistent' : 'inconsistent'}">${consistencyCriteria.cr < 0.1 ? 'La matriz de criterios es consistente.' : 'La matriz de criterios es inconsistente.'}</p>`;
+
+                output.innerHTML += `<p>Pesos finales de las alternativas:</p>`;
+                output.innerHTML += `<ul>`;
+                for (let i = 0; i < alternativesCount; i++) {
+                    output.innerHTML += `<li>${alternativesNames[i]}: ${finalAlternativeWeights[i].toFixed(3)}</li>`;
+                }
+                output.innerHTML += `</ul>`;
+            });
+        });
+    </script>
+</body>
+</html>
